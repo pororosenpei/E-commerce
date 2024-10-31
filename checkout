@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WasteWise Dashboard - Checkout</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #97A97C;
+            --primary-dark: #7A8A62;
+            --text-color: #333;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --transition: all 0.3s ease;
+            --error-color: #ff4757;
+            --success-color: #2ed573;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            line-height: 1.6;
+        }
+
+        /* Navigation styles (preserved from previous) */
+        .top-nav {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+
+        .logo i {
+            margin-right: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-item {
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-size: 1.2rem;
+            padding: 8px;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .icon-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .icon-button img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        /* Checkout page styles */
+        .checkout-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .checkout-title {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            grid-column: 1 / -1;
+        }
+
+        .form-section {
+            background-color: var(--card-background);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(151, 169, 124, 0.2);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .address-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .payment-methods {
+            display: grid;
+            gap: 15px;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .payment-method:hover {
+            border-color: var(--primary-color);
+        }
+
+        .payment-method input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .payment-method.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(151, 169, 124, 0.1);
+        }
+
+        /* Order summary styles */
+        .order-summary {
+            background-color: var(--card-background);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 90px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-total {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .place-order-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .place-order-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .checkout-container {
+                grid-template-columns: 1fr;
+            }
+
+            .address-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .order-summary {
+                position: static;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .checkout-container {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .form-section {
+            animation: slideIn 0.5s ease-out;
+        }
+        /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1100;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .modal.show {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 1;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 40px;
+        border-radius: 15px;
+        text-align: center;
+        max-width: 500px;
+        width: 90%;
+        animation: modalSlideIn 0.5s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal h2 {
+        color: var(--primary-color);
+        margin: 20px 0;
+        font-size: 1.8rem;
+    }
+
+    .order-details {
+        background-color: var(--background-color);
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .redirect-text {
+        color: #666;
+        margin-top: 20px;
+    }
+
+    #countdown {
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+
+    /* Checkmark animation styles */
+    .success-checkmark {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .check-icon {
+        width: 80px;
+        height: 80px;
+        position: relative;
+        border-radius: 50%;
+        box-sizing: content-box;
+        border: 4px solid var(--primary-color);
+    }
+
+    .check-icon::before {
+        top: 3px;
+        left: -2px;
+        width: 30px;
+        transform-origin: 100% 50%;
+        border-radius: 100px 0 0 100px;
+    }
+
+    .check-icon::after {
+        top: 0;
+        left: 30px;
+        width: 60px;
+        transform-origin: 0 50%;
+        border-radius: 0 100px 100px 0;
+        animation: rotate-circle 4.25s ease-in infinite;
+    }
+
+    .check-icon::before, .check-icon::after {
+        content: '';
+        height: 100px;
+        position: absolute;
+        background: #FFFFFF;
+        transform: rotate(-45deg);
+    }
+
+    .icon-line {
+        height: 5px;
+        background-color: var(--primary-color);
+        display: block;
+        border-radius: 2px;
+        position: absolute;
+        z-index: 10;
+    }
+
+    .line-tip {
+        top: 46px;
+        left: 14px;
+        width: 25px;
+        transform: rotate(45deg);
+        animation: icon-line-tip 0.75s infinite;
+    }
+
+    .line-long {
+        top: 38px;
+        right: 8px;
+        width: 47px;
+        transform: rotate(-45deg);
+        animation: icon-line-long 0.75s infinite;
+    }
+
+    .icon-circle {
+        top: -4px;
+        left: -4px;
+        z-index: 10;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        position: absolute;
+        box-sizing: content-box;
+        border: 4px solid var(--primary-color);
+    }
+
+    .icon-fix {
+        top: 8px;
+        width: 5px;
+        left: 26px;
+        z-index: 1;
+        height: 85px;
+        position: absolute;
+        transform: rotate(-45deg);
+        background-color: white;
+    }
+
+    @keyframes rotate-circle {
+        0% {
+            transform: rotate(-45deg);
+        }
+        5% {
+            transform: rotate(-45deg);
+        }
+        12% {
+            transform: rotate(-405deg);
+        }
+        100% {
+            transform: rotate(-405deg);
+        }
+    }
+
+    @keyframes icon-line-tip {
+        0% {
+            width: 0;
+            left: 1px;
+            top: 19px;
+        }
+        54% {
+            width: 0;
+            left: 1px;
+            top: 19px;
+        }
+        70% {
+            width: 50px;
+            left: -8px;
+            top: 37px;
+        }
+        84% {
+            width: 17px;
+            left: 21px;
+            top: 48px;
+        }
+        100% {
+            width: 25px;
+            left: 14px;
+            top: 46px;
+        }
+    }
+
+    @keyframes icon-line-long {
+        0% {
+            width: 0;
+            right: 46px;
+            top: 54px;
+        }
+        65% {
+            width: 0;
+            right: 46px;
+            top: 54px;
+        }
+        84% {
+            width: 55px;
+            right: 0px;
+            top: 35px;
+        }
+        100% {
+            width: 47px;
+            right: 8px;
+            top: 38px;
+        }
+    }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="/" class="logo">
+            <i data-lucide="leaf"></i>
+            <span>WasteWise</span>
+        </a>
+        <div class="nav-links">
+            <a href="#" class="nav-item">Dashboard</a>
+            <a href="#" class="nav-item">Products</a>
+            <a href="#" class="nav-item">Orders</a>
+            <a href="#" class="nav-item">Inventory</a>
+            <a href="#" class="nav-item">Customers</a>
+            <a href="#" class="nav-item">Analytics</a>
+            <a href="#" class="nav-item">Settings</a>
+        </div>
+        <div class="user-actions">
+            <button class="icon-button"><i data-lucide="bell"></i></button>
+            <button class="icon-button"><i data-lucide="shopping-cart"></i></button>
+            <button class="icon-button"><img src="/placeholder-user.jpg" alt="User avatar"></button>
+        </div>
+    </nav>
+
+    <main class="checkout-container">
+        <h1 class="checkout-title">Checkout</h1>
+
+        <div class="checkout-form">
+            <form id="checkoutForm">
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i data-lucide="map-pin"></i>
+                        Shipping Address
+                    </h2>
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-input" required>
+                    </div>
+                    <div class="address-grid">
+                        <div class="form-group">
+                            <label class="form-label">Region</label>
+                            <select class="form-select" required>
+                                <option value="">Select Region</option>
+                                <option value="ncr">National Capital Region (NCR)</option>
+                                <option value="region1">Region I (Ilocos Region)</option>
+                                <option value="region2">Region II (Cagayan Valley)</option>
+                                <option value="region3">Region III (Central Luzon)</option>
+                                <option value="region4a">Region IV-A (CALABARZON)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Province</label>
+                            <select class="form-select" required>
+                                <option value="">Select Province</option>
+                                <option value="metro-manila">Metro Manila</option>
+                                <option value="cavite">Cavite</option>
+                                <option value="laguna">Laguna</option>
+                                <option value="batangas">Batangas</option>
+                                <option value="rizal">Rizal</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="address-grid">
+                        <div class="form-group">
+                            <label class="form-label">City/Municipality</label>
+                            <select class="form-select" required>
+                                <option value="">Select City</option>
+                                <option value="makati">Makati</option>
+                                <option value="manila">Manila</option>
+                                <option value="quezon">Quezon City</option>
+                                <option value="taguig">Taguig</option>
+                                <option value="pasig">Pasig</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Barangay</label>
+                            <select class="form-select" required>
+                                <option value="">Select Barangay</option>
+                                <option value="brgy1">Barangay 1</option>
+                                <option value="brgy2">Barangay 2</option>
+                                <option value="brgy3">Barangay 3</option>
+                                <option value="brgy4">Barangay 4</option>
+                                <option value="brgy5">Barangay 5</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Street Address</label>
+                        <input type="text" class="form-input" placeholder="House/Unit Number, Building, Street Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Number</label>
+                        <input type="tel" class="form-input" placeholder="e.g. 09123456789" pattern="[0-9]{11}" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i data-lucide="message-circle"></i>
+                        Message for Seller
+                    </h2>
+                    <div class="form-group">
+                        <textarea class="form-textarea" placeholder="Add any special instructions or notes for the seller"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i data-lucide="credit-card"></i>
+                        Payment Method
+                    </h2>
+                    <div class="payment-methods">
+                        <label class="payment-method">
+                            <input type="radio" name="payment" value="cod" checked>
+                            <span>Cash on Delivery (COD)</span>
+                        </label>
+                        <label class="payment-method">
+                            <input type="radio" name="payment" value="gcash">
+                            <span>GCash</span>
+                        </label>
+                        <label class="payment-method">
+                            <input type="radio" name="payment" value="maya">
+                            <span>Maya</span>
+                        </label>
+                        <label class="payment-method">
+                            <input type="radio" name="payment" value="card">
+                            <span>Credit/Debit Card</span>
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="order-summary">
+            <h2 class="section-title">
+                <i data-lucide="shopping-bag"></i>
+                Order Summary
+            </h2>
+            
+            <div class="summary-item">
+                <span>Subtotal</span>
+                <span>₱60.96</span>
+            </div>
+            <div class="summary-item">
+                <span>Shipping Fee</span>
+                <span>₱50.00</span>
+            </div>
+            <div class="summary-item">
+                <span>Tax</span>
+                <span>₱6.10</span>
+            </div>
+            <div class="summary-item summary-total">
+                <span>Total</span>
+                <span>₱117.06</span>
+            </div>
+            <button type="submit" form="checkoutForm" class="place-order-btn">
+                <i data-lucide="check-circle"></i>
+                Place Order
+            </button>
+        </div>
+    </main>
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <div class="success-checkmark">
+                <div class="check-icon">
+                    <span class="icon-line line-tip"></span>
+                    <span class="icon-line line-long"></span>
+                    <div class="icon-circle"></div>
+                    <div class="icon-fix"></div>
+                </div>
+            </div>
+            <h2>Order Placed Successfully!</h2>
+            <div class="order-details">
+                <div class="detail-item">
+                    <span>Order Number:</span>
+                    <span>#WW12345</span>
+                </div>
+                <div class="detail-item">
+                    <span>Total Amount:</span>
+                    <span>₱117.06</span>
+                </div>
+                <div class="detail-item">
+                    <span>Payment Method:</span>
+                    <span id="selected-payment">Cash on Delivery</span>
+                </div>
+            </div>
+            <p class="redirect-text">Redirecting to cart in <span id="countdown">5</span> seconds...</p>
+        </div>
+    </div>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Payment method selection
+        const paymentMethods = document.querySelectorAll('.payment-method');
+        paymentMethods.forEach(method => {
+            method.addEventListener('click', function() {
+                paymentMethods.forEach(m => m.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // Form submission
+        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Add loading state to button
+            const button = document.querySelector('.place-order-btn');
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i data-lucide="loader"></i>Processing...';
+            button.disabled = true;
+
+            // Simulate order processing
+            setTimeout(() => {
+                alert('Order placed successfully!');
+                button.innerHTML = originalContent;
+                button.disabled = false;
+                lucide.createIcons();
+            }, 2000);
+        });
+
+        // Phone number validation
+        const phoneInput = document.querySelector('input[type="tel"]');
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) {
+                value = value.slice(0, 11);
+            }
+            e.target.value = value;
+        });
+
+        // Navigation item active state
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                navItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        function showSuccessModal() {
+        const modal = document.getElementById('success-modal');
+        const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
+        document.getElementById('selected-payment').textContent = 
+            selectedPayment === 'cod' ? 'Cash on Delivery' :
+            selectedPayment === 'gcash' ? 'GCash' :
+            selectedPayment === 'maya' ? 'Maya' : 'Credit/Debit Card';
+        
+        modal.classList.add('show');
+        
+        let countdown = 5;
+        const countdownElement = document.getElementById('countdown');
+        
+        const timer = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(timer);
+                modal.classList.remove('show');
+                // Redirect to cart page
+                window.location.href = 'cart.html';
+            }
+        }, 1000);
+    }
+
+    // Update the form submission handler
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const button = document.querySelector('.place-order-btn');
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<i data-lucide="loader"></i>Processing...';
+        button.disabled = true;
+
+        // Simulate order processing
+        setTimeout(() => {
+            button.innerHTML = originalContent;
+            button.disabled = false;
+            lucide.createIcons();
+            showSuccessModal();
+        }, 1500);
+    });
+    </script>
+</body>
+</html>
