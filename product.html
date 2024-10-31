@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WasteWise Dashboard</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #97A97C;
+            --primary-dark: #7A8A62;
+            --text-color: #333;
+            --background-color: #f5f5f5;
+            --card-background: #ffffff;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            line-height: 1.6;
+        }
+
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Top Navigation styles */
+        .top-nav {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            font-size: 1.4rem;
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo i {
+            margin-right: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-item {
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: white;
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 50%;
+        }
+
+        .icon-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .icon-button img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .icon-button:hover img {
+            transform: scale(1.1);
+        }
+
+        /* Main content styles */
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+        }
+
+        .search-form {
+            margin-bottom: 30px;
+            display: flex;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-form input {
+            flex-grow: 1;
+            padding: 12px 20px;
+            border: 2px solid var(--primary-color);
+            border-right: none;
+            border-radius: 30px 0 0 30px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .search-form input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(151, 169, 124, 0.3);
+        }
+
+        .search-button {
+            padding: 12px 25px;
+            background: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 0 30px 30px 0;
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+
+        .search-button:hover {
+            background: var(--primary-dark);
+            transform: translateX(3px);
+        }
+
+        /* Dashboard content styles */
+        .dashboard-content {
+            display: grid;
+            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .discount-banner {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            transition: var(--transition);
+        }
+
+        .discount-banner:hover {
+            transform: scale(1.02);
+        }
+
+        .discount-banner h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .discount-banner button {
+            background-color: white;
+            color: var(--primary-color);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .discount-banner button:hover {
+            background-color: var(--primary-dark);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .category-grid, .arrivals-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .category-grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        }
+
+        .arrivals-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+
+        .category-item, .arrival-item {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: var(--transition);
+        }
+
+        .category-item:hover, .arrival-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .category-item img, .arrival-item img {
+            width: 100%;
+            height: auto;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .category-item:hover img, .arrival-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .category-item p, .arrival-item p {
+            font-weight: 500;
+        }
+
+        /* Products section styles */
+        .products-section {
+            margin-top: 50px;
+        }
+
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .products-header h2 {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .filter-sort {
+            display: flex;
+            gap: 15px;
+        }
+
+        .filter-sort select {
+            padding: 8px 15px;
+            border: 2px solid var(--primary-color);
+            border-radius: 5px;
+            background-color: white;
+            color: var(--text-color);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-sort select:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .products-grid {
+            display: grid;
+            gap: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+
+        .product-card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: var(--transition);
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .product-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .product-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .add-to-cart {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .add-to-cart:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Trending sidebar styles */
+        .trending-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: var(--transition);
+        }
+
+        .trending-toggle:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.1) rotate(15deg);
+        }
+
+        .trending-sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100vh;
+            background-color: var(--card-background);
+            box-shadow: -2px 0 15px rgba(0,0,0,0.1);
+            transition: var(--transition);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .trending-sidebar.open {
+            right: 0;
+        }
+
+        .trending-items {
+            margin-top: 30px;
+        }
+
+        .trending-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            transition: var(--transition);
+        }
+
+        .trending-item:hover {
+            background-color: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .trending-item img {
+            width: 60px;
+            height: 60px;
+            margin-right: 15px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .trending-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .trending-item .price {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .top-nav {
+                flex-wrap: wrap;
+            }
+
+            .search-form {
+                order: 3;
+                width: 100%;
+                margin-top: 15px;
+            }
+
+            .dashboard-content {
+                grid-template-columns: 1fr;
+            }
+
+            .category-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .arrivals-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .trending-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+
+            .products-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .filter-sort {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .filter-sort select {
+                width: 48%;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .dashboard-content > *, .products-grid > * {
+            animation: fadeIn 0.5s ease-out, slideIn 0.5s ease-out;
+        }
+
+        .category-item, .arrival-item, .product-card {
+            animation: fadeIn 0.5s ease-out;
+        }
+        .search-form {
+    position: sticky;
+    top: 70px; /* Adjust this as needed based on your layout */
+    z-index: 999; /* Ensures it stays above other content */
+    margin-bottom: 30px;
+    display: flex;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <nav  class="top-nav">
+            <a href="/" class="logo">
+                <i data-lucide="leaf"></i>
+                <span>WasteWise</span>
+            </a>
+            <div class="nav-links">
+                <a href="userdb.html" class="nav-item">Dashboard</a>
+                <a href="product.html" class="nav-item active">Products</a>
+                <a href="order.html" class="nav-item">Orders</a>
+                <a href="#" class="nav-item">Inventory</a>
+                <a href="#" class="nav-item">Customers</a>
+                <a href="#" class="nav-item">Analytics</a>
+                <a href="#" class="nav-item">Settings</a>
+            </div>
+            <div class="user-actions">
+                <button class="icon-button"><i data-lucide="bell"></i></button>
+                <a href="cart.html">
+                    <button class="icon-button">
+                      <i data-lucide="shopping-cart"></i>
+                    </button>
+                  </a>
+                <button class="icon-button"><img src="/placeholder-user.jpg" alt="User avatar"></button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <form class="search-form">
+                <input type="search" placeholder="Search eco-friendly products...">
+                <button type="submit" class="search-button">
+                    <i data-lucide="search"></i>
+                </button>
+            </form>
+
+            <section class="products-section">
+                <div class="products-header">
+                    <h2>Eco-Friendly Products</h2>
+                    <div class="filter-sort">
+                        <select id="category-filter">
+                            <option value="">All Categories</option>
+                            <option value="home">Home & Living</option>
+                            <option value="personal">Personal Care</option>
+                            <option value="office">Office Supplies</option>
+                            <option value="fashion">Eco Fashion</option>
+                        </select>
+                        <select id="sort-options">
+                            <option value="popular">Most Popular</option>
+                            <option value="newest">Newest</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="products-grid">
+                    <div class="product-card">
+                        <img src="/placeholder.svg?height=200&width=300" alt="Bamboo Toothbrush Set" class="product-image">
+                        <div class="product-info">
+                            <h3 class="product-name">Bamboo Toothbrush Set</h3>
+                            <p class="product-description">Pack of 4 eco-friendly bamboo toothbrushes with charcoal-infused bristles.</p>
+                            <span class="product-price">$12.99</span>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <img src="/placeholder.svg?height=200&width=300" alt="Reusable Produce Bags" class="product-image">
+                        <div class="product-info">
+                            <h3 class="product-name">Reusable Produce Bags</h3>
+                            <p class="product-description">Set of 5 mesh bags for grocery shopping, reducing plastic waste.</p>
+                            <span class="product-price">$15.99</span>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <img src="/placeholder.svg?height=200&width=300" alt="Solar-Powered Phone Charger" class="product-image">
+                        <div class="product-info">
+                            <h3 class="product-name">Solar-Powered Phone Charger</h3>
+                            <p class="product-description">Portable solar panel with USB ports for eco-friendly charging on the go.</p>
+                            <span class="product-price">$39.99</span>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <img src="/placeholder.svg?height=200&width=300" alt="Recycled Paper Notebook" class="product-image">
+                        <div class="product-info">
+                            <h3 class="product-name">Recycled Paper Notebook</h3>
+                            <p class="product-description">A5 size notebook made from 100% recycled paper with a cork cover.</p>
+                            <span class="product-price">$8.99</span>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <img src="/placeholder.svg?height=200&width=300" alt="Organic Cotton T-Shirt" class="product-image">
+                        <div class="product-info">
+                            <h3 class="product-name">Organic Cotton T-Shirt</h3>
+                            <p class="product-description">Soft, breathable t-shirt made from 100% organic cotton. Available in various colors.</p>
+                            <span class="product-price">$24.99</span>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <img src="/placeholder.svg?height=200&width=300" alt="Stainless Steel Water Bottle" class="product-image">
+                        <div class="product-info">
+                            <h3 class="product-name">Stainless Steel Water Bottle</h3>
+                            <p class="product-description">Durable 20oz water bottle, perfect for reducing single-use plastic waste.</p>
+                            <span class="product-price">$18.99</span>
+                            <button class="add-to-cart">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <button id="trending-toggle" class="trending-toggle">
+            <i data-lucide="trending-up"></i>
+        </button>
+
+        <aside id="trending-sidebar" class="trending-sidebar">
+            <h2>Trending Items</h2>
+            <div class="trending-items">
+                <div class="trending-item">
+                    <img src="/placeholder.svg?height=50&width=50" alt="Reusable Water Bottle">
+                    <div>
+                        <p>Reusable Water Bottle</p>
+                        <p class="price">$24.99</p>
+                    </div>
+                </div>
+                <div class="trending-item">
+                    <img src="/placeholder.svg?height=50&width=50" alt="Bamboo Cutlery Set">
+                    <div>
+                        <p>Bamboo Cutlery Set</p>
+                        <p class="price">$19.99</p>
+                    </div>
+                </div>
+                <div class="trending-item">
+                    <img src="/placeholder.svg?height=50&width=50" alt="Recycled Tote Bag">
+                    <div>
+                        <p>Recycled Tote Bag</p>
+                        <p class="price">$14.99</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Trending sidebar functionality
+        const trendingSidebar = document.getElementById('trending-sidebar');
+        const trendingToggle = document.getElementById('trending-toggle');
+
+        trendingToggle.addEventListener('click', function() {
+            trendingSidebar.classList.toggle('open');
+        });
+
+        // Close trending sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!trendingSidebar.contains(event.target) && event.target !== trendingToggle) {
+                trendingSidebar.classList.remove('open');
+            }
+        });
+
+        // Prevent closing when clicking inside the trending sidebar
+        trendingSidebar.addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+
+        // Navigation item active state
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                navItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Stagger animation for dashboard content
+        const dashboardItems = document.querySelectorAll('.dashboard-content > *, .products-grid > *');
+        dashboardItems.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Simple filter and sort functionality (for demonstration purposes)
+        const categoryFilter = document.getElementById('category-filter');
+        const sortOptions = document.getElementById('sort-options');
+        const productsGrid = document.querySelector('.products-grid');
+
+        function filterAndSortProducts() {
+            const category = categoryFilter.value;
+            const sortBy = sortOptions.value;
+            
+            // In a real application, you would fetch filtered and sorted data from the server
+            // For this example, we'll just simulate the filtering and sorting
+            
+            const products = Array.from(productsGrid.children);
+            
+            products.forEach(product => {
+                product.style.display = category ? (product.dataset.category === category ? 'block' : 'none') : 'block';
+            });
+
+            products.sort((a, b) => {
+                const priceA = parseFloat(a.querySelector('.product-price').textContent.replace('$', ''));
+                const priceB = parseFloat(b.querySelector('.product-price').textContent.replace('$', ''));
+                
+                if (sortBy === 'price-low') return priceA - priceB;
+                if (sortBy === 'price-high') return priceB - priceA;
+                // For 'popular' and 'newest', we would typically use server-side sorting
+                // Here, we'll just maintain the current order
+                return 0;
+            });
+
+            productsGrid.innerHTML = '';
+            products.forEach(product => productsGrid.appendChild(product));
+        }
+
+        categoryFilter.addEventListener('change', filterAndSortProducts);
+        sortOptions.addEventListener('change', filterAndSortProducts);
+    </script>
+</body>
+</html>
