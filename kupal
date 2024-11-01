@@ -1146,8 +1146,8 @@ background-color: white;
 
 
 
-// Initialize Lucide icons
-lucide.createIcons();
+ // Initialize Lucide icons
+ lucide.createIcons();
 
 // Elements for dropdown and modal
 const userAvatar = document.getElementById('user-avatar');
@@ -1156,6 +1156,7 @@ const logoutOption = document.getElementById('logout-option');
 const logoutModal = document.getElementById('logout-modal');
 const closeModal = document.getElementById('close-modal');
 const cancelButton = document.getElementById('cancel-button');
+const logoutButton = document.getElementById('logout-button'); // Get the logout button
 
 // Toggle dropdown when avatar is clicked
 userAvatar.addEventListener('click', function () {
@@ -1184,12 +1185,18 @@ cancelButton.addEventListener('click', function () {
     logoutModal.classList.remove('show');
 });
 
+// Redirect to login page when "Logout" button is clicked
+logoutButton.addEventListener('click', function () {
+    window.location.href = 'login.html';
+});
+
 // Close the modal if user clicks outside of it
 window.addEventListener('click', function (event) {
     if (event.target === logoutModal) {
         logoutModal.classList.remove('show');
     }
 });
+
 
 
 
