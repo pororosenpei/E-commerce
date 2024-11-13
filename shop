@@ -10,8 +10,7 @@
  
     <style>
 
-
-/* Styles for the modal */
+        /* Styles for the modal */
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
@@ -813,37 +812,58 @@
         }
 
 
-/* Container for products in a horizontal layout */
-.products-grid {
-    display: flex;
-    flex-direction: row;   /* Aligns the items horizontally */
-    flex-wrap: wrap;       /* Allows items to wrap to the next row if there's not enough space */
-    gap: 20px;             /* Adds space between product cards */
-    justify-content: flex-start; /* Aligns items to the left */
-    width: 100%;           /* Ensures the grid takes the full width of the container */
-    padding: 10px;
-    box-sizing: border-box; 
-}
-
-/* Styling for each product card */
-.product-card {
-    border: 1px solid #ccc;
-    padding: 10px;
-    width: 200px;               /* Sets a fixed width for each card */
-    text-align: center;
-    box-sizing: border-box;
-    margin: 10px;               /* Space between cards */
-}
-
-/* Product image styling */
-.product-card img {
-    max-width: 100%;
-    height: auto;
-}
 
 
+        /* Container for products in a horizontal layout */
+        .products-grid {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: flex-start;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
 
+        /* Styling for each product card */
+        .product-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 200px;
+            text-align: center;
+            box-sizing: border-box;
+            margin: 10px;
+        }
 
+        /* Product image styling */
+        .product-card img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Styling for Cart and Buy buttons */
+        .product-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .product-buttons .cart-button,
+        .product-buttons .buy-button {
+            padding: 8px 12px;
+            font-size: 14px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .product-buttons .cart-button:hover,
+        .product-buttons .buy-button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -854,7 +874,7 @@
         </a>
         <div class="nav-links">
             <a href="#" class="nav-item">Dashboard</a>
-            <a href="product.html" class="nav-item">Products</a>
+            <a href="shop.html" class="nav-item">Products</a>
             <a href="#" class="nav-item">Orders</a>
             <a href="#" class="nav-item">Inventory</a>
             <a href="#" class="nav-item">Customers</a>
@@ -903,14 +923,9 @@
                 <h2>Eco-Friendly Products</h2>
             </div>
 
-            <div id="shopContainer">
+            <div id="shopContainer"></div>
 
-
-        </section>
-
-        <div class="products-grid" id="productsGrid"></div>
-                <!-- Add other product cards similarly -->
-            </div>
+            <div class="products-grid" id="productsGrid"></div>
         </section>
     </main>
 
@@ -928,6 +943,27 @@
             updateCartCount();
             renderCartItems();
             updateTotalPrice();
+
+            // Show "Cart" and "Buy" buttons after adding a product to the cart
+            showCartAndBuyButtons(productName);
+        }
+
+        // Function to display "Cart" and "Buy" buttons after product is added
+        function showCartAndBuyButtons(productName) {
+            const productCard = document.querySelector(`.product-card[data-product-name='${productName}']`);
+            
+            if (productCard) {
+                let buttonsDiv = document.createElement("div");
+                buttonsDiv.classList.add("product-buttons");
+
+                buttonsDiv.innerHTML = `
+                    <button class="cart-button" onclick="goToCartPage()">Cart</button>
+                    <button class="buy-button" onclick="goToCartPage()">Buy</button>
+                `;
+
+                // Append buttons below the product details
+                productCard.appendChild(buttonsDiv);
+            }
         }
 
         // Update cart count in header
@@ -953,110 +989,82 @@
             window.location.href = "cart.html";
         }
 
-        
- // Initialize Lucide icons
- lucide.createIcons();
+        // Initialize Lucide icons
+        lucide.createIcons();
 
-// Elements for dropdown and modal
-const userAvatar = document.getElementById('user-avatar');
-const userDropdown = document.getElementById('user-dropdown');
-const logoutOption = document.getElementById('logout-option');
-const logoutModal = document.getElementById('logout-modal');
-const closeModal = document.getElementById('close-modal');
-const cancelButton = document.getElementById('cancel-button');
-const logoutButton = document.getElementById('logout-button'); // Get the logout button
+        // Elements for dropdown and modal
+        const userAvatar = document.getElementById('user-avatar');
+        const userDropdown = document.getElementById('user-dropdown');
+        const logoutOption = document.getElementById('logout-option');
+        const logoutModal = document.getElementById('logout-modal');
+        const closeModal = document.getElementById('close-modal');
+        const cancelButton = document.getElementById('cancel-button');
+        const logoutButton = document.getElementById('logout-button');
 
-// Toggle dropdown when avatar is clicked
-userAvatar.addEventListener('click', function () {
-    userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-});
-
-// Close dropdown if clicking outside
-window.addEventListener('click', function (event) {
-    if (!event.target.closest('.user-actions')) {
-        userDropdown.style.display = 'none';
-    }
-});
-
-// Show logout modal when "Logout" is clicked
-logoutOption.addEventListener('click', function () {
-    logoutModal.classList.add('show'); // Show the logout modal
-    userDropdown.style.display = 'none'; // Hide dropdown
-});
-
-// Close modal when close button or cancel button is clicked
-closeModal.addEventListener('click', function () {
-    logoutModal.classList.remove('show');
-});
-
-cancelButton.addEventListener('click', function () {
-    logoutModal.classList.remove('show');
-});
-
-// Redirect to login page when "Logout" button is clicked
-logoutButton.addEventListener('click', function () {
-    window.location.href = 'login.html';
-});
-
-// Close the modal if user clicks outside of it
-window.addEventListener('click', function (event) {
-    if (event.target === logoutModal) {
-        logoutModal.classList.remove('show');
-    }
-});
-
-
-
-function loadProducts() {
-        const products = JSON.parse(localStorage.getItem("products")) || [];
-        const productsGrid = document.getElementById("productsGrid");
-
-        productsGrid.innerHTML = ''; // Clear current product display
-
-        // Iterate over stored products and create cards
-        products.forEach(product => {
-            const productCard = document.createElement("div");
-            productCard.classList.add("product-card");
-
-            productCard.innerHTML = `
-                <img src="${product.image}" alt="${product.name}" class="product-image">
-                <div class="product-info">
-                    <h3 class="product-name">${product.name}</h3>
-                    <span class="product-price">$${product.price.toFixed(2)}</span>
-                    <button class="add-to-cart" onclick="addToCart('${product.name}', ${product.price})">Add to Cart</button>
-                </div>
-            `;
-
-            productsGrid.appendChild(productCard);
+        // Toggle dropdown when avatar is clicked
+        userAvatar.addEventListener('click', function () {
+            userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
         });
-    }
 
-    window.onload = loadProducts;
+        // Close dropdown if clicking outside
+        window.addEventListener('click', function (event) {
+            if (!event.target.closest('.user-actions')) {
+                userDropdown.style.display = 'none';
+            }
+        });
 
-    function displayProducts() {
-      const shopContainer = document.getElementById('shopContainer');
-      const products = JSON.parse(localStorage.getItem('products')) || [];
+        // Show logout modal when "Logout" is clicked
+        logoutOption.addEventListener('click', function () {
+            logoutModal.classList.add('show');
+            userDropdown.style.display = 'none';
+        });
 
-      products.forEach(product => {
-        const productCard = document.createElement('div');
-        productCard.classList.add('product-card');
+        // Close modal when close button or cancel button is clicked
+        closeModal.addEventListener('click', function () {
+            logoutModal.classList.remove('show');
+        });
 
-        productCard.innerHTML = `
-          <img src="${product.image}" alt="${product.name}">
-          <h3>${product.name}</h3>
-          <p>Price: $${product.price}</p>
-          <p>${product.description}</p>
-        `;
+        cancelButton.addEventListener('click', function () {
+            logoutModal.classList.remove('show');
+        });
 
-        shopContainer.appendChild(productCard);
-      });
-    }
+        // Redirect to login page when "Logout" button is clicked
+        logoutButton.addEventListener('click', function () {
+            window.location.href = 'login.html';
+        });
 
-    // Load products when the page is loaded
-    window.onload = displayProducts;
+        // Close the modal if user clicks outside of it
+        window.addEventListener('click', function (event) {
+            if (event.target === logoutModal) {
+                logoutModal.classList.remove('show');
+            }
+        });
 
+        function loadProducts() {
+            const products = JSON.parse(localStorage.getItem("products")) || [];
+            const productsGrid = document.getElementById("productsGrid");
 
+            productsGrid.innerHTML = ''; // Clear current product display
 
+            // Iterate over products and display them on the page
+            products.forEach(product => {
+                const productCard = document.createElement("div");
+                productCard.classList.add("product-card");
+                productCard.setAttribute('data-product-name', product.name); // Store product name for later reference
+
+                productCard.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}">
+                    <h3>${product.name}</h3>
+                    <p>$${product.price}</p>
+                    <button onclick="addToCart('${product.name}', ${product.price})">Add to Cart</button>
+                `;
+
+                productsGrid.appendChild(productCard);
+            });
+        }
+
+        // Call loadProducts function to populate products when the page loads
+        loadProducts();
     </script>
 </body>
 </html>
