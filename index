@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WasteWise - Transforming Waste into Value</title>
+    <style>
+        /* Base styles */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        /* Header styles */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #97a97c;
+            text-decoration: none;
+        }
+        nav ul {
+            display: flex;
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+        nav ul li a {
+            color: #333;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        nav ul li a:hover {
+            color: #97a97c;
+        }
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background-color: white;
+            color: #97a97c;
+            border: 1px solid #97a97c;
+        }
+        .btn-outline:hover {
+            background-color: #f0f7e6;
+        }
+        .btn-primary {
+            background-color: #97a97c;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #7a8a63;
+        }
+        /* Hero section styles */
+        .hero {
+            position: relative;
+            height: 600px;
+            overflow: hidden;
+        }
+        .hero-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .hero-slide.active {
+            opacity: 1;
+        }
+        .hero-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .hero-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            z-index: 1;
+        }
+        .hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
+    background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent dark background */
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Soft shadow for depth */
+}
+
+.hero-content p {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .hero-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.5);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .hero-arrow:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .hero-arrow-left {
+            left: 20px;
+        }
+        .hero-arrow-right {
+            right: 20px;
+        }
+        /* Featured products styles */
+        .featured-products {
+            padding: 4rem 0;
+            background-color: white;
+        }
+        .section-title {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        .product-card {
+            background-color: #f0f7e6;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        .product-image {
+    height: 200px; /* Set a fixed height */
+    width: 100%; /* Make the image take the full width of the card */
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Hide overflow if the image is larger */
+}
+
+.product-image img {
+    max-height: 100%; /* Limit the height to the container */
+    width: auto; /* Maintain aspect ratio */
+    object-fit: cover; /* Cover the entire area without distortion */
+}
+
+        .product-info {
+            padding: 1rem;
+        }
+        .product-name {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .product-price {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        /* Special offer styles */
+        .special-offer {
+            background-color: #f0f7e6;
+            padding: 4rem 0;
+            text-align: center;
+        }
+        .special-offer h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .special-offer p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        /* Customer reviews styles */
+        .customer-reviews {
+            padding: 4rem 0;
+            background-color: white;
+        }
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .review-card {
+            background-color: #f0f7e6;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
+        .stars {
+            color: #ffd700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .review-text {
+            margin-bottom: 1rem;
+        }
+        .reviewer-name {
+            font-weight: bold;
+        }
+        /* Newsletter styles */
+        .newsletter {
+            background-color: #f0f7e6;
+            padding: 4rem 0;
+            text-align: center;
+        }
+        .newsletter h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .newsletter p {
+            margin-bottom: 2rem;
+        }
+        .newsletter-form {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .newsletter-form input {
+            flex-grow: 1;
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem 0 0 0.25rem;
+        }
+        .newsletter-form button {
+            padding: 0.5rem 1rem;
+            background-color: #97a97c;
+            color: white;
+            border: none;
+            border-radius: 0 0.25rem 0.25rem 0;
+            cursor: pointer;
+        }
+        /* Footer styles */
+        footer {
+            background-color: #97a97c;
+            color: white;
+            padding: 4rem 0 2rem;
+        }
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+        .footer-section h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .footer-section ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+        .footer-section ul li a {
+            color: white;
+            text-decoration: none;
+        }
+        .footer-section ul li a:hover {
+            text-decoration: underline;
+        }
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+        }
+        .social-icons a {
+            color: white;
+            font-size: 1.5rem;
+        }
+        .footer-bottom {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            nav ul {
+                flex-direction: column;
+                margin-top: 1rem;
+            }
+            nav ul li {
+                margin-left: 0;
+                margin-bottom: 0.5rem;
+            }
+            .auth-buttons {
+                margin-top: 1rem;
+            }
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+            .hero-content p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo">WasteWise</a>
+                <nav>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        
+                        
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">About Us</a></li>
+                    </ul>
+                </nav>
+                <div class="auth-buttons">
+                  <a href="login.html">  <button class="btn btn-outline">Sign In</button> </a>
+                   <a href="signup.html"> <button class="btn btn-primary">Sign Up</button></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>Transforming Waste into Value</h1>
+                <p>Explore sustainable solutions with our curated collection of recycled materials.</p>
+                <button class="btn btn-primary">Shop Now</button>
+            </div>
+            <button class="hero-arrow hero-arrow-left" aria-label="Previous slide">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <button class="hero-arrow hero-arrow-right" aria-label="Next slide">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+            <div class="hero-slide active">
+                <img src="wat.jpg" alt="Slide 1">
+            </div>
+            <div class="hero-slide">
+                <img src="biogas.jfif" alt="Slide 2">
+            </div>
+            <div class="hero-slide">
+                <img src="light.jpg" alt="Slide 3">
+            </div>
+        </section>
+
+        <section class="featured-products">
+            <div class="container">
+                <h2 class="section-title">Featured Products</h2>
+                <div class="products-grid">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="bote.png" alt="Bottle" class="image">
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">Bottle</h3>
+                            <p class="product-price">₱100.00</p>
+                           <a href="login.html"> <button class="btn btn-primary">Add to Cart</button> </a>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="bakal.png" alt="Bakal" />
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">Bakal</h3>
+                            <p class="product-price">₱200.00</p>
+                         <a href="login.html">  <button class="btn btn-primary">Add to Cart</button></a> 
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="jar.jpg" alt="Jar" />
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">Jar</h3>
+                            <p class="product-price">₱300.00</p>
+                         <a href="login.html">  <button class="btn btn-primary">Add to Cart</button> </a> 
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="cans.jpg" alt="Cans" />
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">Cans</h3>
+                            <p class="product-price">₱400.00</p>
+                          <a href="login.html">  <button class="btn btn-primary">Add to Cart</button> </a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+
+        <section class="special-offer">
+            <div class="container">
+                <h2>Special Offer</h2>
+                
+                <p>Get 30% Off on New Arrivals</p>
+                <button class="btn btn-primary">Shop Sale</button>
+            </div>
+        </section>
+
+        <section class="customer-reviews">
+            <div class="container">
+                <h2 class="section-title">Customer Reviews</h2>
+                <div class="reviews-grid">
+                    <div class="review-card">
+                        <div class="stars">★★★★★</div>
+                        <p class="review-text">"Great quality and fast shipping!"</p>
+                        <p class="reviewer-name">Emm</p>
+                    </div>
+                    <div class="review-card">
+                        <div class="stars">★★★★☆</div>
+                        <p class="review-text">"Love the designs, will buy again."</p>
+                        <p class="reviewer-name">Lumang</p>
+                    </div>
+                    <div class="review-card">
+                        <div class="stars">★★★★★</div>
+                        <p class="review-text">"Excellent customer service!"</p>
+                        <p class="reviewer-name">Selrahc</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="newsletter">
+            <div class="container">
+                <h2>Subscribe to Our Newsletter</h2>
+                <p>Sign up and get 10% off your first order</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Enter your email" required>
+                    <button type="submit" class="btn btn-primary">Subscribe</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About Us</h3>
+                    <p>Explore sustainable solutions with our curated collection of recycled materials.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <ul>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Shipping & Returns</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#">New Arrivals</a></li>
+                        <li><a href="#">Sale</a></li>
+                        <li><a href="#">Gift Cards</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-icons">
+                        <a href="#" aria-label="Facebook">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                        </a>
+                        <a href="#" aria-label="Instagram">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                        </a>
+                        <a href="#" aria-label="Twitter">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 WasteWise. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Hero slider functionality
+        const slides = document.querySelectorAll('.hero-slide');
+        const prevButton = document.querySelector('.hero-arrow-left');
+        const nextButton = document.querySelector('.hero-arrow-right');
+        let currentSlide = 0;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            showSlide(currentSlide);
+        }
+
+        prevButton.addEventListener('click', prevSlide);
+        nextButton.addEventListener('click', nextSlide);
+
+        // Auto-rotate slides every 5 seconds
+        setInterval(nextSlide, 5000);
+    </script>
+</body>
+</html>
