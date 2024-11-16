@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Product</title>
+  <style>
+    /* Modal Background */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgb(0, 0, 0);
+      background-color: rgba(0, 0, 0, 0.4);
+      transition: opacity 0.3s ease;
+    }
+
+    /* Modal Content */
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 500px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    /* Modal Header */
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+    }
+
+    /* Modal Close Button */
+    .close {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* Form Styling */
+    label {
+      display: block;
+      margin: 5px 0;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    input[type="file"] {
+      width: calc(100% - 20px); /* Adjust width for better alignment */
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    /* Adjust textarea to be more compact */
+    textarea {
+      height: 80px;
+    }
+
+    /* Align all form fields */
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    button {
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    /* Align buttons */
+    .modal-content form {
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Add Product Button -->
+  <button id="openModalBtn">Add Product</button>
+
+  <!-- Modal -->
+  <div id="productModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add a New Product</h2>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+      <form id="productForm" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="productName">Product Name:</label>
+          <input type="text" id="productName" name="productName" required>
+        </div>
+
+        <div class="form-group">
+          <label for="productPrice">Price ($):</label>
+          <input type="number" id="productPrice" name="productPrice" required>
+        </div>
+
+        <div class="form-group">
+          <label for="productDescription">Description:</label>
+          <textarea id="productDescription" name="productDescription" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="productImage">Product Image:</label>
+          <input type="file" id="productImage" name="productImage" accept="image/*" required>
+        </div>
+
+        <button type="button" onclick="addProduct()">Add Product</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Get modal and button elements
+    const modal = document.getElementById('productModal');
+    const openModalBtn = document.getElementById('openModalBtn');
+
+    // Open the modal
+    openModalBtn.onclick = function() {
+      modal.style.display = "block";
+    }
+
+    // Close the modal when clicking on <span> (x)
+    function closeModal() {
+      modal.style.display = "none";
+    }
+
+    // Close the modal if the user clicks outside of it
+    window.onclick = function(event) {
+      if (event.target === modal) {
+        closeModal();
+      }
+    }
+
+    function addProduct() {
+      const name = document.getElementById('productName').value;
+      const price = document.getElementById('productPrice').value;
+      const description = document.getElementById('productDescription').value;
+      const imageInput = document.getElementById('productImage');
+
+      if (imageInput.files && imageInput.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          // Retrieve existing products or create an empty array
+          const products = JSON.parse(localStorage.getItem('products')) || [];
+          
+          // Add the new product
+          products.push({
+            name,
+            price,
+            description,
+            image: e.target.result
+          });
+
+          // Save updated products array in localStorage
+          localStorage.setItem('products', JSON.stringify(products));
+          
+          alert("Product added successfully!");
+          closeModal();
+        };
+
+        reader.readAsDataURL(imageInput.files[0]);
+      }
+
+      // Clear form
+      document.getElementById('productForm').reset();
+    }
+  </script>
+
+</body>
+</html>

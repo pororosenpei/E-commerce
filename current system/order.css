@@ -1,0 +1,369 @@
+:root {
+    --primary-color: #97A97C;
+    --primary-dark: #7A8A62;
+    --text-color: #333;
+    --background-color: #f5f5f5;
+    --card-background: #ffffff;
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    line-height: 1.6;
+}
+
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Top Navigation styles */
+.top-nav {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    font-size: 1.4rem;
+    transition: var(--transition);
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+
+.logo i {
+    margin-right: 10px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-item {
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.nav-item:hover, .nav-item.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.user-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: white;
+    transition: var(--transition);
+    padding: 8px;
+    border-radius: 50%;
+}
+
+.icon-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.icon-button img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+.icon-button:hover img {
+    transform: scale(1.1);
+}
+
+/* Main content styles */
+.main-content {
+    flex-grow: 1;
+    padding: 30px;
+}
+
+.search-form {
+    margin-bottom: 30px;
+    display: flex;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.search-form input {
+    flex-grow: 1;
+    padding: 12px 20px;
+    border: 2px solid var(--primary-color);
+    border-right: none;
+    border-radius: 30px 0 0 30px;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.search-form input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(151, 169, 124, 0.3);
+}
+
+.search-button {
+    padding: 12px 25px;
+    background: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 0 30px 30px 0;
+    color: white;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+}
+
+.search-button:hover {
+    background: var(--primary-dark);
+    transform: translateX(3px);
+}
+
+/* Orders section styles */
+.orders-section {
+    margin-top: 50px;
+}
+
+.orders-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.orders-header h2 {
+    font-size: 2rem;
+    color: var(--primary-color);
+}
+
+.filter-sort {
+    display: flex;
+    gap: 15px;
+}
+
+.filter-sort select {
+    padding: 8px 15px;
+    border: 2px solid var(--primary-color);
+    border-radius: 5px;
+    background-color: white;
+    color: var(--text-color);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.filter-sort select:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.orders-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 15px;
+}
+
+.orders-table th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    padding: 15px;
+    text-align: left;
+}
+
+.orders-table td {
+    background-color: var(--card-background);
+    padding: 15px;
+}
+
+.orders-table tr {
+    transition: var(--transition);
+}
+
+.orders-table tr:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.orders-table tr td:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.orders-table tr td:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.status-pending {
+    background-color: #FFF3CD;
+    color: #856404;
+}
+
+.status-processing {
+    background-color: #CCE5FF;
+    color: #004085;
+}
+
+.status-shipped {
+    background-color: #D4EDDA;
+    color: #155724;
+}
+
+.status-delivered {
+    background-color: #C3E6CB;
+    color: #1E7E34;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.action-button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.view-button {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.view-button:hover {
+    background-color: var(--primary-dark);
+}
+
+.edit-button {
+    background-color: #FFC107;
+    color: #000;
+}
+
+.edit-button:hover {
+    background-color: #E0A800;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+
+    .top-nav {
+        flex-wrap: wrap;
+    }
+
+    .search-form {
+        order: 3;
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .orders-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .filter-sort {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .filter-sort select {
+        width: 48%;
+    }
+
+    .orders-table {
+        font-size: 0.9rem;
+    }
+
+    .orders-table th,
+    .orders-table td {
+        padding: 10px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-button {
+        width: 100%;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.orders-section {
+    animation: fadeIn 0.5s ease-out, slideIn 0.5s ease-out;
+}
+
+.orders-table tr {
+    animation: fadeIn 0.5s ease-out;
+}
+.search-form {
+position: sticky;
+top: 70px; /* Adjust this as needed based on your layout */
+z-index: 999; /* Ensures it stays above other content */
+margin-bottom: 30px;
+display: flex;
+max-width: 600px;
+margin-left: auto;
+margin-right: auto;
+}
