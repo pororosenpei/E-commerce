@@ -271,7 +271,32 @@ $products = getProducts();
         </div>
     </div>
 
-    <script src="manage_p.php">        
+    <script>
+        // Populate the edit form with product details when "Edit" button is clicked
+        function editProduct(id) {
+            // Get product data (replace with real AJAX call to fetch data)
+            var product = <?= json_encode($products); ?>.find(p => p.id == id);
+            
+            // Fill the edit form with existing product data
+            document.getElementById('edit_id').value = product.id;
+            document.getElementById('edit_name').value = product.name;
+            document.getElementById('edit_price').value = product.price;
+            document.getElementById('edit_stock').value = product.stock;
+            document.getElementById('edit_category').value = product.category;
+            document.getElementById('edit_description').value = product.description;
+            document.getElementById('edit_existing_image').value = product.image;
+            
+            // Preview the existing image
+            document.getElementById('edit_existing_image_preview').src = product.image;
+            
+            // Show the edit form
+            document.getElementById('editProductForm').classList.remove('hidden');
+        }
+
+        // Close the edit form
+        function closeEditForm() {
+            document.getElementById('editProductForm').classList.add('hidden');
+        }
     </script>
 </body>
 </html>
