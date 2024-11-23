@@ -41,9 +41,23 @@ function updateProduct($id, $name, $description, $price, $stock, $category, $ima
     return $stmt->execute();
 }
 
-// Function to delete a product
+// Updated function to delete a product and its associated image
 function deleteProduct($id) {
     global $db;
+    
+    // First, get the image path
+    $stmt = $db->prepare("SELECT image FROM products WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $product = $result->fetch_assoc();
+    
+    if ($product && file_exists($product['image'])) {
+        // Delete the image file
+        unlink($product['image']);
+    }
+    
+    // Now delete the product from the database
     $stmt = $db->prepare("DELETE FROM products WHERE id = ?");
     $stmt->bind_param("i", $id);
     return $stmt->execute();
@@ -136,7 +150,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
     } elseif (isset($_POST['delete_product'])) {
-        deleteProduct($_POST['id']);
+        $result = deleteProduct($_POST['id']);
+        if ($result) {
+            $_SESSION['success_message'] = "Product deleted successfully.";
+        } else {
+            $_SESSION['error_message'] = "Failed to delete the product.";
+        }
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit;
     }
 }
 
@@ -250,32 +271,7 @@ $products = getProducts();
         </div>
     </div>
 
-    <script>
-        // Populate the edit form with product details when "Edit" button is clicked
-        function editProduct(id) {
-            // Get product data (replace with real AJAX call to fetch data)
-            var product = <?= json_encode($products); ?>.find(p => p.id == id);
-            
-            // Fill the edit form with existing product data
-            document.getElementById('edit_id').value = product.id;
-            document.getElementById('edit_name').value = product.name;
-            document.getElementById('edit_price').value = product.price;
-            document.getElementById('edit_stock').value = product.stock;
-            document.getElementById('edit_category').value = product.category;
-            document.getElementById('edit_description').value = product.description;
-            document.getElementById('edit_existing_image').value = product.image;
-            
-            // Preview the existing image
-            document.getElementById('edit_existing_image_preview').src = product.image;
-            
-            // Show the edit form
-            document.getElementById('editProductForm').classList.remove('hidden');
-        }
-
-        // Close the edit form
-        function closeEditForm() {
-            document.getElementById('editProductForm').classList.add('hidden');
-        }
+    <script src="manage_p.php">        
     </script>
 </body>
 </html>
