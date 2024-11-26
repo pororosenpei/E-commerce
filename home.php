@@ -7,19 +7,30 @@ if ($db->connect_error) {
     die("Connection failed: " . $db->connect_error);
 }
 
-// Function to get products with optional search and category filter
+// Function to get all products
 function getProducts($search = '', $category = '') {
     global $db;
-    $query = "SELECT * FROM products WHERE 1=1";
+    $query = "SELECT p.*, ec.name as event_category_name 
+              FROM products p 
+              LEFT JOIN event_categories ec ON p.event_category_id = ec.id 
+              WHERE 1=1";
     if (!empty($search)) {
         $search = $db->real_escape_string($search);
-        $query .= " AND (name LIKE '%$search%' OR description LIKE '%$search%')";
+        $query .= " AND (p.name LIKE '%$search%' OR p.description LIKE '%$search%')";
     }
     if (!empty($category)) {
         $category = $db->real_escape_string($category);
-        $query .= " AND category = '$category'";
+        $query .= " AND p.category = '$category'";
     }
-    $query .= " ORDER BY created_at DESC";
+    $query .= " ORDER BY p.created_at DESC";
+    $result = $db->query($query);
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+// Function to get all event categories
+function getEventCategories() {
+    global $db;
+    $query = "SELECT * FROM event_categories ORDER BY name ASC";
     $result = $db->query($query);
     return $result->fetch_all(MYSQLI_ASSOC);
 }
@@ -65,10 +76,20 @@ if (isset($_POST['action']) && isset($_POST['product_id'])) {
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $category = isset($_GET['category']) ? $_GET['category'] : '';
-$products = getProducts($search, $category);
+$all_products = getProducts($search, $category);
+
+// Filter products for Christmas and regular sections
+$christmas_products = array_filter($all_products, function($product) {
+    return !is_null($product['event_category_id']) && strtolower($product['event_category_name']) === 'christmas';
+});
+$regular_products = array_filter($all_products, function($product) {
+    return is_null($product['event_category_id']) || strtolower($product['event_category_name']) !== 'christmas';
+});
+
 $wishlist = getWishlistItems();
 
 $categories = ['Paper', 'Plastic', 'Metal', 'Glass', 'Electronics', 'Textiles'];
+$event_categories = getEventCategories();
 ?>
 
 <!DOCTYPE html>
@@ -76,138 +97,123 @@ $categories = ['Paper', 'Plastic', 'Metal', 'Glass', 'Electronics', 'Textiles'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wastewise E-commerce</title>
+    <title>Wastewise E-commerce - Christmas Special</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="home.css">
-
+    <style>
+        .christmas-theme {
+            background: linear-gradient(to bottom, #1a472a, #2d724a);
+        }
+        .snow {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            filter: blur(1px);
+        }
+        @keyframes snowfall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-100 font-sans">
     <!-- Sidebar Toggle Button -->
-    <button class="sidebar-toggle" onclick="toggleSidebar()">
+    <button class="fixed top-4 left-4 z-50 bg-green-600 text-white p-2 rounded-full shadow-lg" onclick="toggleSidebar()">
         <i class="fas fa-bars"></i>
     </button>
 
     <!-- Sidebar -->
-    <nav class="sidebar" id="sidebar">
-        <div>
-            <a href="home.php" class="nav-item mb-4" onclick="showSection('home')">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
-            <a href="" class="nav-item mb-4" onclick="showSection('wishlist')">
-                <i class="fas fa-heart"></i>
-                <span>Wishlist</span>
-            </a>
-            <a href="cart.php" class="nav-item mb-4">
-                <i class="fas fa-shopping-cart"></i>
-                <span>Cart</span>
-            </a>
-        </div>
-        <div>
-            <a href="#" class="nav-item">
-                <i class="fas fa-user"></i>
-                <span>Profile</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
-            </a>
+    <nav class="fixed top-0 left-0 h-full w-64 bg-green-800 text-white p-5 transform -translate-x-full transition-transform duration-200 ease-in-out z-40" id="sidebar">
+        <div class="flex flex-col h-full">
+            <div class="flex-grow">
+                <a href="#" class="block py-2 px-4 hover:bg-green-700 rounded transition duration-200" onclick="showSection('home')">
+                    <i class="fas fa-home mr-2"></i>
+                    <span>Home</span>
+                </a>
+                <a href="#" class="block py-2 px-4 hover:bg-green-700 rounded transition duration-200" onclick="showSection('wishlist')">
+                    <i class="fas fa-heart mr-2"></i>
+                    <span>Wishlist</span>
+                </a>
+                <a href="cart.php" class="block py-2 px-4 hover:bg-green-700 rounded transition duration-200">
+                    <i class="fas fa-shopping-cart mr-2"></i>
+                    <span>Cart</span>
+                </a>
+            </div>
+            <div>
+                <a href="#" class="block py-2 px-4 hover:bg-green-700 rounded transition duration-200">
+                    <i class="fas fa-user mr-2"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="#" class="block py-2 px-4 hover:bg-green-700 rounded transition duration-200">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
         </div>
     </nav>
 
     <!-- Main Content -->
     <div class="content" id="content">
-        <!-- Header -->
-        <header class="header text-white py-6">
+        <!-- Header with Search -->
+        <header class="bg-green-700 text-white py-6 sticky top-0 z-30">
             <div class="container mx-auto px-4">
-                <h1 class="text-4xl font-bold text-center mb-2">Wastewise E-commerce</h1>
-                <p class="text-lg text-center">Sustainable Shopping for a Better Tomorrow</p>
-            </div>
-        </header>
-
-        <main class="container mx-auto px-4 py-12">
-            <!-- Home Section -->
-            <section id="home-section">
-                <p class="text-xl text-center text-gray-600 mb-8">
-                    Explore our collection of eco-friendly products crafted from recycled materials.
-                </p>
-
-                <!-- Search and Filter Section -->
-                <div class="mb-8">
-                    <form action="" method="GET" class="flex flex-wrap items-center justify-center gap-4">
-                        <input type="text" name="search" placeholder="Search products..." value="<?= htmlspecialchars($search) ?>" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <select name="category" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <h1 class="text-3xl font-bold mb-4 md:mb-0">Wastewise E-commerce</h1>
+                    <form action="" method="GET" class="flex items-center">
+                        <input type="text" name="search" placeholder="Search products..." value="<?= htmlspecialchars($search) ?>" class="px-4 py-2 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800">
+                        <select name="category" class="px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800">
                             <option value="">All Categories</option>
                             <?php foreach ($categories as $cat): ?>
                                 <option value="<?= $cat ?>" <?= $category === $cat ? 'selected' : '' ?>><?= $cat ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">Search</button>
+                        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-r-lg hover:bg-green-500 transition duration-300">Search</button>
                     </form>
                 </div>
+            </div>
+        </header>
 
-                <!-- Product Grid -->
+        <!-- Christmas Banner -->
+        <div class="christmas-theme text-white py-12 relative overflow-hidden">
+            <div class="container mx-auto px-4 relative z-10">
+                <h2 class="text-4xl md:text-6xl font-bold text-center mb-4">Christmas Special</h2>
+                <p class="text-xl md:text-2xl text-center mb-8">Discover eco-friendly gifts for your loved ones!</p>
+                <div class="text-center">
+                    <a href="#christmas-products" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 inline-block">Shop Now</a>
+                </div>
+            </div>
+            <?php for ($i = 0; $i < 50; $i++): ?>
+                <div class="snow" style="left: <?= rand(0, 100); ?>vw; animation: snowfall <?= rand(5, 15); ?>s linear infinite;"></div>
+            <?php endfor; ?>
+        </div>
+
+        <main class="container mx-auto px-4 py-12">
+            <!-- Event Products Section -->
+            <section id="christmas-products" class="mb-16">
+                <h2 class="text-3xl font-bold mb-8 text-center text-green-800">Christmas Collection</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    <?php if (empty($products)): ?>
-                        <p class="col-span-full text-center text-gray-600">No products found.</p>
+                    <?php if (empty($christmas_products)): ?>
+                        <p class="col-span-full text-center text-gray-600">No Christmas products available at the moment.</p>
                     <?php else: ?>
-                        <?php foreach ($products as $index => $product): ?>
-                            <div class="product-card bg-white rounded-lg overflow-hidden shadow-md relative">
-                                <!-- Image Section -->
-                                <div class="relative h-64">
-                                    <?php if (!empty($product['image']) && file_exists($product['image'])): ?>
-                                        <img src="<?= htmlspecialchars($product['image']); ?>" alt="<?= htmlspecialchars($product['name']); ?>" class="w-full h-full object-cover cursor-pointer" onclick="openModal(<?= $index; ?>)">
-                                    <?php else: ?>
-                                        <img src="https://via.placeholder.com/300x300.png?text=No+Image" alt="No Image Available" class="w-full h-full object-cover cursor-pointer" onclick="openModal(<?= $index; ?>)">
-                                    <?php endif; ?>
-                                    <span class="eco-badge">Eco-friendly</span>
-                                </div>
-
-                                <!-- Product Details -->
-                                <div class="p-6">
-                                    <h2 class="text-xl font-semibold mb-2 text-gray-800"><?= htmlspecialchars($product['name']); ?></h2>
-                                    <p class="text-gray-600 mb-4 text-sm h-12 overflow-hidden"><?= htmlspecialchars($product['description']); ?></p>
-                                    <div class="flex justify-between items-center mb-4">
-                                        <p class="text-2xl font-bold text-green-600">₱<?= number_format($product['price'], 2); ?></p>
-                                        <p class="text-sm text-gray-500">Stock: <?= $product['stock']; ?></p>
-                                    </div>
-                                    <p class="text-sm text-gray-500 mb-4">Category: <?= htmlspecialchars($product['category']); ?></p>
-
-                                    <!-- Add to Cart Button and Heart Icon -->
+                        <?php foreach ($christmas_products as $product): ?>
+                            <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+                                <img src="<?= htmlspecialchars($product['image'] ?? 'https://via.placeholder.com/300x300.png?text=No+Image'); ?>" 
+                                     alt="<?= htmlspecialchars($product['name']); ?>" 
+                                     class="w-full h-48 object-cover">
+                                <div class="p-4">
+                                    <h3 class="text-xl font-semibold mb-2"><?= htmlspecialchars($product['name']); ?></h3>
+                                    <p class="text-gray-600 mb-4"><?= htmlspecialchars(substr($product['description'], 0, 100)) . '...'; ?></p>
                                     <div class="flex justify-between items-center">
-                                        <button onclick="openCartModal(<?= htmlspecialchars(json_encode($product)); ?>)" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300 transform hover:scale-105">
-                                            <i class="fas fa-shopping-cart"></i>
+                                        <span class="text-2xl font-bold text-green-600">₱<?= number_format($product['price'], 2); ?></span>
+                                        <button onclick="addToCart(<?= $product['id']; ?>)" class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-300">
+                                            Add to Cart
                                         </button>
-                                        <span class="heart <?= in_array($product['id'], $wishlist) ? 'filled' : '' ?>" onclick="toggleWishlist(<?= $product['id']; ?>, this)">
-                                            <i class="fas fa-heart"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Modal -->
-                            <div id="modal-<?= $index; ?>" class="modal">
-                                <div class="bg-white rounded-lg shadow-lg p-6 w-3/4 max-w-lg">
-                                    <div class="relative">
-                                        <button class="absolute top-2 right-2 text-gray-500 hover:text-gray-800" onclick="closeModal(<?= $index; ?>)">
-                                            &times;
-                                        </button>
-                                    </div>
-                                    <img src="<?= htmlspecialchars($product['image'] ?? 'https://via.placeholder.com/300x300.png?text=No+Image'); ?>"
-                                         alt="<?= htmlspecialchars($product['name']); ?>" class="w-full h-64 object-cover rounded-lg mb-4">
-                                    <h2 class="text-2xl font-bold mb-2"><?= htmlspecialchars($product['name']); ?></h2>
-                                    <p class="text-gray-600 mb-4"><?= htmlspecialchars($product['description']); ?></p>
-                                    <p class="text-lg font-semibold">Price: ₱<?= number_format($product['price'], 2); ?></p>
-                                    <p class="text-sm text-gray-500">Stock: <?= $product['stock']; ?></p>
-                                    <p class="text-sm text-gray-500">Category: <?= htmlspecialchars($product['category']); ?></p>
-                                    <div class="mt-4 flex justify-between items-center">
-                                        <button onclick="openCartModal(<?= htmlspecialchars(json_encode($product)); ?>)" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
-                                            <i class="fas fa-shopping-cart mr-2"></i>Add to Cart
-                                        </button>
-                                        <span class="heart <?= in_array($product['id'], $wishlist) ? 'filled' : '' ?>" onclick="toggleWishlist(<?= $product['id']; ?>, this)">
-                                            <i class="fas fa-heart"></i>
-                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -216,26 +222,60 @@ $categories = ['Paper', 'Plastic', 'Metal', 'Glass', 'Electronics', 'Textiles'];
                 </div>
             </section>
 
+            <!-- Regular Products Section -->
+            <section id="regular-products">
+                <h2 class="text-3xl font-bold mb-8 text-center text-green-800">Our Products</h2>
+                
+                <!-- Product Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <?php if (empty($regular_products)): ?>
+                        <p class="col-span-full text-center text-gray-600">No products found.</p>
+                    <?php else: ?>
+                        <?php foreach ($regular_products as $product): ?>
+                            <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+                                <img src="<?= htmlspecialchars($product['image'] ?? 'https://via.placeholder.com/300x300.png?text=No+Image'); ?>" 
+                                     alt="<?= htmlspecialchars($product['name']); ?>" 
+                                     class="w-full h-48 object-cover">
+                                <div class="p-4">
+                                    <h3 class="text-xl font-semibold mb-2"><?= htmlspecialchars($product['name']); ?></h3>
+                                    <p class="text-gray-600 mb-4"><?= htmlspecialchars(substr($product['description'], 0, 100)) . '...'; ?></p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-2xl font-bold text-green-600">₱<?= number_format($product['price'], 2); ?></span>
+                                        <button onclick="addToCart(<?= $product['id']; ?>)" class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition duration-300">
+                                            Add to Cart
+                                        </button>
+                                    </div>
+                                    <?php if (!is_null($product['event_category_id']) && strtolower($product['event_category_name']) !== 'christmas'): ?>
+                                        <p class="mt-2 text-sm text-gray-500">Event: <?= htmlspecialchars($product['event_category_name']); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </section>
+
             <!-- Wishlist Section -->
-            <section id="wishlist-section" style="display: none;">
-                <h2 class="text-2xl font-bold mb-4">Your Wishlist</h2>
+            <section id="wishlist-section" class="hidden mt-16">
+                <h2 class="text-3xl font-bold mb-8 text-center text-green-800">Your Wishlist</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     <?php
-                    $wishlistProducts = array_filter($products, function($product) use ($wishlist) {
+                    $wishlistProducts = array_filter($all_products, function($product) use ($wishlist) {
                         return in_array($product['id'], $wishlist);
                     });
                     if (empty($wishlistProducts)): ?>
                         <p class="col-span-full text-center text-gray-600">Your wishlist is empty.</p>
                     <?php else: ?>
                         <?php foreach ($wishlistProducts as $product): ?>
-                            <div class="product-card bg-white rounded-lg overflow-hidden shadow-md relative">
-                                <div class="relative h-64">
-                                    <img src="<?= htmlspecialchars($product['image'] ?? 'https://via.placeholder.com/300x300.png?text=No+Image'); ?>" alt="<?= htmlspecialchars($product['name']); ?>" class="w-full h-full object-cover">
-                                </div>
-                                <div class="p-6">
+                            <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+                                <img src="<?= htmlspecialchars($product['image'] ?? 'https://via.placeholder.com/300x300.png?text=No+Image'); ?>" 
+                                     alt="<?= htmlspecialchars($product['name']); ?>" 
+                                     class="w-full h-48 object-cover">
+                                <div class="p-4">
                                     <h3 class="text-xl font-semibold mb-2"><?= htmlspecialchars($product['name']); ?></h3>
                                     <p class="text-gray-600 mb-4">₱<?= number_format($product['price'], 2); ?></p>
-                                    <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="toggleWishlist(<?= $product['id']; ?>, this)">
+                                    <button class="w-full bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-300" 
+                                            onclick="removeFromWishlist(<?= $product['id']; ?>)">
                                         Remove from Wishlist
                                     </button>
                                 </div>
@@ -246,7 +286,7 @@ $categories = ['Paper', 'Plastic', 'Metal', 'Glass', 'Electronics', 'Textiles'];
             </section>
         </main>
 
-        <footer class="bg-gray-800 text-white py-8 mt-12">
+        <footer class="bg-green-800 text-white py-8">
             <div class="container mx-auto px-4 text-center">
                 <p>&copy; 2023 Wastewise E-commerce. All rights reserved.</p>
                 <p class="mt-2">Committed to a sustainable future through recycling and eco-friendly shopping.</p>
@@ -254,25 +294,112 @@ $categories = ['Paper', 'Plastic', 'Metal', 'Glass', 'Electronics', 'Textiles'];
         </footer>
     </div>
 
-    <!-- Cart Modal -->
-    <div id="cart-modal" class="cart-modal">
-        <div class="cart-modal-content fade-in">
-            <h2 class="text-2xl font-bold mb-4">Add to Cart</h2>
-            <div id="cart-product-details" class="mb-4"></div>
-            <form id="add-to-cart-form" action="cart.php" method="POST">
-                <input type="hidden" name="action" value="add">
-                <input type="hidden" name="product_id" id="cart-product-id">
-                <label for="quantity" class="block mb-2">Quantity:</label>
-                <input type="number" id="quantity" name="quantity" min="1" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md mb-4">
-                <div class="flex justify-between">
-                    <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Add to Cart</button>
-                    <button type="button" onclick="closeCartModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">Cancel</button>
+    <!-- Quantity Modal -->
+    <div id="quantity-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <button id="close-modal" class="absolute top-2 right-2 text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Select Quantity</h3>
+                <div class="mt-2 px-7 py-3">
+                    <input type="number" id="quantity-input" min="1" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                 </div>
-            </form>
+                <div class="items-center px-4 py-3">
+                    <button id="add-to-cart-btn" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <button id="close-success-modal" class="absolute top-2 right-2 text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Successfully Added to Cart</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">Your item has been added to the cart.</p>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <a href="cart.php" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 inline-block">
+                        View Cart
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="home.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
+        function showSection(sectionId) {
+            document.getElementById('regular-products').style.display = sectionId === 'home' ? 'block' : 'none';
+            document.getElementById('wishlist-section').style.display = sectionId === 'wishlist' ? 'block' : 'none';
+            document.getElementById('christmas-products').style.display = sectionId === 'home' ? 'block' : 'none';
+        }
+
+        let currentProductId = null;
+
+        function addToCart(productId) {
+            currentProductId = productId;
+            document.getElementById('quantity-modal').classList.remove('hidden');
+        }
+
+        document.getElementById('add-to-cart-btn').addEventListener('click', function() {
+            const quantity = document.getElementById('quantity-input').value;
+            
+            // AJAX request to add item to cart
+            fetch('add_to_cart.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `product_id=${currentProductId}&quantity=${quantity}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('quantity-modal').classList.add('hidden');
+                    document.getElementById('success-modal').classList.remove('hidden');
+                } else {
+                    alert('Failed to add item to cart. Please try again.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('close-modal').addEventListener('click', function() {
+            document.getElementById('quantity-modal').classList.add('hidden');
+        });
+
+        document.getElementById('close-success-modal').addEventListener('click', function() {
+            document.getElementById('success-modal').classList.add('hidden');
+        });
+
+        function removeFromWishlist(productId) {
+            fetch('home.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=remove&product_id=${productId}`
+            })
+            .then(response => response.text())
+            .then(() => {
+                location.reload();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
 </body>
 </html>
+
