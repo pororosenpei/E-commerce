@@ -9,12 +9,19 @@ if ($db->connect_error) {
 // Function to get all products
 function getProducts() {
     global $db;
-    $result = $db->query("SELECT * FROM products ORDER BY created_at DESC");
+    $result = $db->query("SELECT p.*, ec.name as event_category_name FROM products p LEFT JOIN event_categories ec ON p.event_category_id = ec.id ORDER BY p.created_at DESC");
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+// Function to get all event categories
+function getEventCategories() {
+    global $db;
+    $result = $db->query("SELECT * FROM event_categories ORDER BY name ASC");
     return $result->fetch_all(MYSQLI_ASSOC);
 }
 
 // Function to add a new product
-function addProduct($name, $description, $price, $stock, $category, $image_path) {
+function addProduct($name, $description, $price, $stock, $category, $image_path, $event_category_id) {
     global $db;
 
     // Check for existing product with the same name and category
@@ -28,20 +35,20 @@ function addProduct($name, $description, $price, $stock, $category, $image_path)
     }
 
     // Proceed to add the product if no duplicate exists
-    $stmt = $db->prepare("INSERT INTO products (name, description, price, stock, category, image) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssdiss", $name, $description, $price, $stock, $category, $image_path);
+    $stmt = $db->prepare("INSERT INTO products (name, description, price, stock, category, image, event_category_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssdissi", $name, $description, $price, $stock, $category, $image_path, $event_category_id);
     return $stmt->execute();
 }
 
 // Function to update a product
-function updateProduct($id, $name, $description, $price, $stock, $category, $image_path) {
+function updateProduct($id, $name, $description, $price, $stock, $category, $image_path, $event_category_id) {
     global $db;
-    $stmt = $db->prepare("UPDATE products SET name = ?, description = ?, price = ?, stock = ?, category = ?, image = ? WHERE id = ?");
-    $stmt->bind_param("ssdissi", $name, $description, $price, $stock, $category, $image_path, $id);
+    $stmt = $db->prepare("UPDATE products SET name = ?, description = ?, price = ?, stock = ?, category = ?, image = ?, event_category_id = ? WHERE id = ?");
+    $stmt->bind_param("ssdissii", $name, $description, $price, $stock, $category, $image_path, $event_category_id, $id);
     return $stmt->execute();
 }
 
-// Updated function to delete a product and its associated image
+// Function to delete a product and its associated image
 function deleteProduct($id) {
     global $db;
     
@@ -60,6 +67,14 @@ function deleteProduct($id) {
     // Now delete the product from the database
     $stmt = $db->prepare("DELETE FROM products WHERE id = ?");
     $stmt->bind_param("i", $id);
+    return $stmt->execute();
+}
+
+// Function to add a new event category
+function addEventCategory($name, $description) {
+    global $db;
+    $stmt = $db->prepare("INSERT INTO event_categories (name, description) VALUES (?, ?)");
+    $stmt->bind_param("ss", $name, $description);
     return $stmt->execute();
 }
 
@@ -89,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Allow certain file formats
                 if($imageFileType == "jpg" || $imageFileType == "png" || $imageFileType == "jpeg" || $imageFileType == "gif") {
                     if (move_uploaded_file($image_file["tmp_name"], $target_file)) {
-                        $result = addProduct($_POST['name'], $description, $_POST['price'], $_POST['stock'], $_POST['category'], $target_file);
+                        $result = addProduct($_POST['name'], $description, $_POST['price'], $_POST['stock'], $_POST['category'], $target_file, $_POST['event_category_id']);
 
                         if ($result === true) {
                             // Redirect to prevent resubmission
@@ -138,8 +153,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         // Proceed to update the product with the existing or new image
-        if (!$error_message) {
-            $result = updateProduct($_POST['id'], $_POST['name'], $_POST['description'], $_POST['price'], $_POST['stock'], $_POST['category'], $image_path);
+        if (!isset($error_message)) {
+            $result = updateProduct($_POST['id'], $_POST['name'], $_POST['description'], $_POST['price'], $_POST['stock'], $_POST['category'], $image_path, $_POST['event_category_id']);
 
             if ($result === true) {
                 // Redirect to prevent resubmission
@@ -152,9 +167,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } elseif (isset($_POST['delete_product'])) {
         $result = deleteProduct($_POST['id']);
         if ($result) {
-            $_SESSION['success_message'] = "Product deleted successfully.";
+            echo json_encode(['success' => true, 'message' => "Product deleted successfully."]);
         } else {
-            $_SESSION['error_message'] = "Failed to delete the product.";
+            echo json_encode(['success' => false, 'message' => "Failed to delete the product."]);
+        }
+        exit;
+    } elseif (isset($_POST['add_event_category'])) {
+        $result = addEventCategory($_POST['event_name'], $_POST['event_description']);
+        if ($result) {
+            $_SESSION['success_message'] = "Event category added successfully.";
+        } else {
+            $_SESSION['error_message'] = "Failed to add event category.";
         }
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
@@ -162,6 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 $products = getProducts();
+$event_categories = getEventCategories();
 ?>
 
 <!DOCTYPE html>
@@ -169,12 +193,24 @@ $products = getProducts();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wastewise E-commerce Admin - Manage Products</title>
+    <title>Wastewise E-commerce Admin - Manage Products and Events</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-6">Wastewise E-commerce Admin - Manage Products</h1>
+        <h1 class="text-3xl font-bold mb-6">Wastewise E-commerce Admin - Manage Products and Events</h1>
+        
+        <!-- Add Event Category Form -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4">Add New Event Category</h2>
+            <form action="" method="POST">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="text" name="event_name" placeholder="Event Category Name" required class="border p-2 rounded">
+                    <textarea name="event_description" placeholder="Event Category Description" class="border p-2 rounded" required></textarea>
+                </div>
+                <button type="submit" name="add_event_category" class="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Add Event Category</button>
+            </form>
+        </div>
         
         <!-- Add Product Form -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
@@ -192,8 +228,14 @@ $products = getProducts();
                         <option value="Electronics">Electronics</option>
                         <option value="Textiles">Textiles</option>
                     </select>
-                    <textarea name="description" placeholder="Description (20-30 words)" class="border p-2 rounded col-span-2" required></textarea>
+                    <textarea name="description" placeholder="Description (5-20 words)" class="border p-2 rounded col-span-2" required></textarea>
                     <input type="file" name="image" accept="image/*" required class="border p-2 rounded col-span-2">
+                    <select name="event_category_id" class="border p-2 rounded">
+                        <option value="">Select Event Category (Optional)</option>
+                        <?php foreach ($event_categories as $event_category): ?>
+                            <option value="<?= $event_category['id']; ?>"><?= htmlspecialchars($event_category['name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <button type="submit" name="add_product" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Product</button>
             </form>
@@ -214,6 +256,7 @@ $products = getProducts();
                             <th class="px-4 py-2">Price</th>
                             <th class="px-4 py-2">Stock</th>
                             <th class="px-4 py-2">Category</th>
+                            <th class="px-4 py-2">Event Category</th>
                             <th class="px-4 py-2">Actions</th>
                         </tr>
                     </thead>
@@ -227,12 +270,10 @@ $products = getProducts();
                             <td class="border px-4 py-2"><?= number_format($product['price'], 2); ?></td>
                             <td class="border px-4 py-2"><?= $product['stock']; ?></td>
                             <td class="border px-4 py-2"><?= $product['category']; ?></td>
+                            <td class="border px-4 py-2"><?= $product['event_category_name'] ?? 'N/A'; ?></td>
                             <td class="border px-4 py-2">
-                                <button onclick="editProduct(<?= $product['id']; ?>)" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Edit</button>
-                                <form action="" method="POST" class="inline-block">
-                                    <input type="hidden" name="id" value="<?= $product['id']; ?>">
-                                    <button type="submit" name="delete_product" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Delete</button>
-                                </form>
+                                <button onclick="editProduct(<?= htmlspecialchars(json_encode($product)); ?>)" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Edit</button>
+                                <button onclick="confirmDelete(<?= $product['id']; ?>)" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Delete</button>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -261,9 +302,15 @@ $products = getProducts();
                         <option value="Electronics">Electronics</option>
                         <option value="Textiles">Textiles</option>
                     </select>
-                    <textarea id="edit_description" name="description" placeholder="Description (20-30 words)" class="border p-2 rounded col-span-2" required></textarea>
+                    <textarea id="edit_description" name="description" placeholder="Description (5-20 words)" class="border p-2 rounded col-span-2" required></textarea>
                     <input type="file" name="image" accept="image/*" class="border p-2 rounded col-span-2">
                     <img id="edit_existing_image_preview" src="" alt="Existing Image" class="w-20 h-20 object-cover col-span-2">
+                    <select id="edit_event_category_id" name="event_category_id" class="border p-2 rounded">
+                        <option value="">Select Event Category (Optional)</option>
+                        <?php foreach ($event_categories as $event_category): ?>
+                            <option value="<?= $event_category['id']; ?>"><?= htmlspecialchars($event_category['name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <button type="submit" name="update_product" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Update Product</button>
                 <button type="button" onclick="closeEditForm()" class="mt-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
@@ -273,11 +320,7 @@ $products = getProducts();
 
     <script>
         // Populate the edit form with product details when "Edit" button is clicked
-        function editProduct(id) {
-            // Get product data (replace with real AJAX call to fetch data)
-            var product = <?= json_encode($products); ?>.find(p => p.id == id);
-            
-            // Fill the edit form with existing product data
+        function editProduct(product) {
             document.getElementById('edit_id').value = product.id;
             document.getElementById('edit_name').value = product.name;
             document.getElementById('edit_price').value = product.price;
@@ -285,9 +328,8 @@ $products = getProducts();
             document.getElementById('edit_category').value = product.category;
             document.getElementById('edit_description').value = product.description;
             document.getElementById('edit_existing_image').value = product.image;
-            
-            // Preview the existing image
             document.getElementById('edit_existing_image_preview').src = product.image;
+            document.getElementById('edit_event_category_id').value = product.event_category_id || '';
             
             // Show the edit form
             document.getElementById('editProductForm').classList.remove('hidden');
@@ -296,6 +338,28 @@ $products = getProducts();
         // Close the edit form
         function closeEditForm() {
             document.getElementById('editProductForm').classList.add('hidden');
+        }
+
+        function confirmDelete(productId) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                fetch('admin_panel.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'delete_product=1&id=' + productId
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
         }
     </script>
 </body>
